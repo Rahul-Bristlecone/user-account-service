@@ -1,0 +1,68 @@
+# also named as release.yml -> only thing to consider is whether we have to use artifact image from build stage
+# or we can build it again in this workflow
+name: Docker Publish
+
+on:
+  # 1️⃣ Trigger automatically after the 'Coverage' workflow finishes successfully
+  workflow_run:
+    workflows: [ "Coverage" ]  # 👈 Name must match exactly your coverage workflow
+    types: [ completed ]
+
+concurrency:
+  # 2️⃣ Prevent multiple publish jobs for the same ref at once
+  group: docker-publish-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  publish:
+    # 3️⃣ Run only if Coverage workflow concluded successfully
+    if: ${{ github.event.workflow_run.conclusion == 'success' }}
+    runs-on: ubuntu-latest
+
+    env:
+      IMAGE_NAME: ${{ secrets.DOCKERHUB_USERNAME }}/myapp
+
+    steps:
+      # 4️⃣ Download the Docker image artifact built earlier in CI
+      - name: Download Docker image artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: docker-image
+          path: .
+
+      # 5️⃣ Load image into the local Docker daemon
+      - name: Load Docker image
+        run: gunzip -c myapp.tar.gz | docker load
+
+      # 6️⃣ Log in to Docker Hub
+      #     Requires DOCKERHUB_USERNAME and DOCKERHUB_TOKEN secrets
+      - name: Log in to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      # (Optional) Log in to GHCR instead of/in addition to Docker Hub
+      # - name: Log in to GitHub Container Registry
+      #   uses: docker/login-action@v3
+      #   with:
+      #     registry: ghcr.io
+      #     username: ${{ github.actor }}
+      #     password: ${{ secrets.GITHUB_TOKEN }}
+
+      # 7️⃣ Tag image for commit SHA
+      - name: Tag image with commit SHA
+        run: docker tag myapp:ci $IMAGE_NAME:${{ github.event.workflow_run.head_sha }}
+
+      # 8️⃣ (Optional) Tag image as 'latest' for main branch
+      - name: Tag image as latest
+        if: github.ref == 'refs/heads/main' || github.event.workflow_run.head_branch == 'main'
+        run: docker tag myapp:ci $IMAGE_NAME:latest
+
+      # 9️⃣ Push image tags to Docker Hub
+      - name: Push Docker image(s)
+        run: |
+          docker push $IMAGE_NAME:${{ github.event.workflow_run.head_sha }}
+          if [ "${{ github.ref }}" == "refs/heads/main" ] || [ "${{ github.event.workflow_run.head_branch }}" == "main" ]; then
+            docker push $IMAGE_NAME:latest
+          fi

@@ -1,0 +1,70 @@
+version: '3.8'
+services:
+  user-db:
+    image: mysql:8.0
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASSWORD}
+      MYSQL_DATABASE: ${DB_NAME}
+      MYSQL_USER: ${DB_USER}
+      MYSQL_PASSWORD: ${DB_PASSWORD}
+#    healthcheck:
+#      test: [ "CMD-SHELL", "mysqladmin ping -h localhost -uroot -prootpass --silent" ]
+#      interval: 5s
+#      timeout: 3s
+#      retries: 30
+    volumes:
+      - user_service_db:/var/lib/mysql
+
+  user-service-tests:
+    build:
+      # if below context is ./user_service, it won't find Dockerfile_multi_stage
+      context: ./user_service
+      dockerfile: Dockerfile_multi_stage
+      target: test
+    image: myapp:ci-test  # optional: tag the test image, this is for using pre-built image from GitHub artifact registry
+    env_file:
+      - .env        # make sure Flask service gets the same env vars
+    environment:
+      # Point the tests to the DB container
+      - FLASK_ENV=test
+    depends_on:
+      user_service_db:
+        condition: service_healthy
+        # If tests also require the API server running, you can instead depend on store-service runtime
+        # and still run pytest focused on integration tests that call HTTP endpoints.
+        # For pure DB-layer tests, this container can run pytest directly:
+    command: >
+      sh -lc "
+      echo 'Waiting for DB...' &&
+      python -c 'import time; time.sleep(2)' &&
+      # Optional: run migrations/seed here (Alembic example):
+      # alembic upgrade head &&
+      pytest -q --maxfail=1 --disable-warnings --junitxml=/reports/junit.xml
+      "
+    volumes:
+      # Optional: capture reports
+      - ./reports:/reports
+
+  # Optional: bring up the runtime app too for API-level integration tests
+  # This allows you to run tests that hit the actual HTTP endpoints.
+  # In summary, store-service is used in integration tests to provide a live API endpoint for
+  # your tests (in store_service_tests) to interact with, simulating real-world usage.
+  # docker-compose -f compose-test-stage.yml up store-service store-service-tests -> this will start both services
+  # store-service & store-service-tests can be run together to test the full stack
+  # or separately if you only want to run unit tests against the DB layer.
+  # this will create a container from the image pushed to DockerHub
+  store-service:
+    image: myorg/store-service:latest  # how to push image on DockerHub
+    environment:
+      FLASK_ENV: test
+    env_file:
+      - .env
+    depends_on:
+      mysql-db:
+        condition: service_healthy
+    ports:
+      - "5000:5000"
+
+volumes:
+  mysql-test-data:

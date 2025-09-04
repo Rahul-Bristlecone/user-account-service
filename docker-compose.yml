@@ -1,0 +1,25 @@
+services:
+  user_db:
+    image: mysql:8.0
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASSWORD}
+      MYSQL_DATABASE: ${DB_NAME}
+      MYSQL_USER: ${DB_USER}
+      MYSQL_PASSWORD: ${DB_PASSWORD}
+    volumes:
+      - user_service_db:/var/lib/mysql
+    ports:
+      - "3307:3306"  # host:container (outside use 3307, inside still 3306)
+
+  user_service:
+    build: ./user_service
+    depends_on:
+      - user_db
+    env_file:
+      - .env          # make sure Flask service gets the same env vars
+    ports:
+      - "5001:5000"
+
+volumes:
+  user_service_db:
