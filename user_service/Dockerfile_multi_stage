@@ -6,9 +6,9 @@ ENV PYTHONDONTWRITEBYTECODE=1 \
     PIP_NO_CACHE_DIR=1
 WORKDIR /app
 
-############################
-# Deps (runtime)
-############################
+#-----------------#
+# Deps (runtime)  #
+#-----------------#
 FROM base AS deps
 COPY requirements.txt .
 RUN python -m venv /opt/venv && . /opt/venv/bin/activate && pip install -r requirements.txt

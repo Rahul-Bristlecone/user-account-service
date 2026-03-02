@@ -1,0 +1,40 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: store-db
+spec:
+  selector:
+    matchLabels:
+      app: store-db
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: store-db
+    spec:
+      containers:
+      - name: mysql
+        image: mysql:8.0
+        envFrom:
+        - secretRef:
+            name: mysql-secret
+        ports:
+        - containerPort: 3306
+        volumeMounts:
+        - name: mysql-persistent-storage
+          mountPath: /var/lib/mysql
+      volumes:
+      - name: mysql-persistent-storage
+        persistentVolumeClaim:
+          claimName: mysql-pvc
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: store-db
+spec:
+  selector:
+    app: store-db
+  ports:
+    - port: 3306
+      targetPort: 3306
