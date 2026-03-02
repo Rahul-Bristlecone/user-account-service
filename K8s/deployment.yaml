@@ -1,0 +1,69 @@
+#apiVersion: v1  #API version for the Kubernetes object
+#kind: Pod #Type of Kubernetes object, in this case, a Pod
+#metadata: #Metadata for the Pod, including its name
+#  name: nginx-pod #Name of the Pod
+#spec: #Specification of the Pod, including the containers it will run
+#  containers: #List of containers that will run in the Pod
+#  - name: nginx-container #Name of the container
+#    image: nginx:latest #Docker image to use for the container, in this case, the latest version of Nginx
+#    ports:  #List of ports that the container will expose
+#    - containerPort: 80 #Port number that the container will listen on, in this case, port 80 for HTTP traffic
+#      #etcd will use this information to manage the state of the Pod and ensure that it is running as expected.
+#      #The Nginx container will serve web traffic on port 80, and the Pod will be managed by Kubernetes to
+#      #ensure high availability and scalability.
+
+#multi-container Pod example
+apiVersion: v1
+kind: Pod
+metadata:
+  name: multi-container-pod
+  labels:
+    app: user-service
+    team: authentication
+spec:
+  restartPolicy: Always
+  containers:
+    - name: crash-test-container
+      image: busybox:latest
+      resources:
+        requests:
+          memory: "128Mi"
+          cpu: "250m"
+        limits:
+          memory: "256Mi"
+          cpu: "500m"
+      command: ["/bin/sh"]
+      args: ["-c", "echo 'This container will crash in 30 seconds'; sleep 30; exit 1"]
+  ports:
+    - containerPort: 80
+    - name: log-agent-container
+      image: busybox:latest
+      command: ["sh", "-c", "while true; do echo '$(date): Logging...'; sleep 5; done"]
+    - name: redis-container
+      image: redis:latest
+      ports:
+      - containerPort: 6379
+    - name: mysql-container
+      image: mysql:latest
+      ports:
+      - containerPort: 3306
+  env:
+    - name: MYSQL_ROOT_PASSWORD
+      value: "rootpass"
+    - name: MYSQL_DATABASE
+      value: "store_db"
+    - name: MYSQL_USER
+      value: "user"
+    - name: MYSQL_PASSWORD
+      value: "password"
+  volumeMounts:
+    - name: mysql-persistent-storage
+      mountPath: /var/lib/mysql
+volumeClaimTemplates:
+  - metadata:
+    name: mysql-persistent-storage
+  - spec:
+    accessModes: ["ReadWriteOnce"]
+    resources:
+      requests:
+        storage: 1Gi

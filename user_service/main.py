@@ -40,8 +40,8 @@ def create_app(db_url=None):
     """
 
     SQLALCHEMY_DATABASE_URI = (
-        f"mysql+pymysql://{os.getenv('DB_USER')}:{os.getenv('DB_PASSWORD')}@"
-        f"{os.getenv('DB_HOST')}:{os.getenv('DB_PORT')}/{os.getenv('DB_NAME')}"
+        f"mysql+pymysql://{os.getenv('MYSQL_USER')}:{os.getenv('MYSQL_PASSWORD')}@"
+        f"{os.getenv('DB_HOST')}:{os.getenv('DB_PORT')}/{os.getenv('MYSQL_DATABASE')}"
     )
     print("Connecting to DB:", SQLALCHEMY_DATABASE_URI)  # helpful for debugging
 

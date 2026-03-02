@@ -1,49 +1,49 @@
 version: '3.8'
 services:
-  store-db:
-    image: mysql:8.0
-    restart: always
-    environment:
-      MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASSWORD}
-      MYSQL_DATABASE: ${DB_NAME}
-      MYSQL_USER: ${DB_USER}
-      MYSQL_PASSWORD: ${DB_PASSWORD}
-#    healthcheck:
-#      test: [ "CMD-SHELL", "mysqladmin ping -h localhost -uroot -prootpass --silent" ]
-#      interval: 5s
-#      timeout: 3s
-#      retries: 30
-    volumes:
-      - store_service_db:/var/lib/mysql
-
   user-service:
     build:
-      context: ./user_service
-      dockerfile: Dockerfile_multi_stage
-      target: runtime
+      context: ../user_service
+      dockerfile: Dockerfile
+  #    target: runtime
     env_file:
       - .env
     environment:
       - FLASK_ENV=development
     depends_on:
-      mysql-db:
+      store-db:
         condition: service_healthy
     ports:
       - "5001:5000"
 
+  store-db:
+    image: mysql:8.0
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+      MYSQL_DATABASE: ${MYSQL_DATABASE}
+      MYSQL_USER: ${MYSQL_USER}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD}
+    healthcheck:
+      test: ["CMD-SHELL", "mysqladmin ping -h localhost -u$MYSQL_USER -p$MYSQL_PASSWORD --silent"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    volumes:
+      - store_service_db:/var/lib/mysql
+
   # this is just for example of using pre-built image from DockerHub
   # user_service is not dependent on store_service
-  store-service:
-    image: myorg/store-service:latest  # how to push image on DockerHub
-    environment:
-      FLASK_ENV: test
-    env_file:
-      - .env
-    depends_on:
-      mysql-db:
-        condition: service_healthy
-    ports:
-      - "5000:5000"
+#  store-service:
+#    image: myorg/store-service:latest  # how to push image on DockerHub
+#    environment:
+#      FLASK_ENV: test
+#    env_file:
+#      - .env
+#    depends_on:
+#      mysql-db:
+#        condition: service_healthy
+#    ports:
+#      - "5000:5000"
 
 volumes:
-  mysql-data:
+  store_service_db:
