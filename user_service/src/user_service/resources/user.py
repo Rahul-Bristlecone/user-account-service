@@ -4,6 +4,7 @@ from passlib.hash import pbkdf2_sha256
 from flask_jwt_extended import create_access_token, get_jwt, jwt_required
 from user_service.blocklist import BLOCKLIST
 
+from user_service.src.user_service.extensions.redis_client import redis_client
 from user_service.src.user_service.extensions.db import db
 from user_service.src.user_service.models.user_db import UserModel
 from user_service.src.user_service.schemas.user_schema import UserSchema
@@ -36,6 +37,8 @@ class UserAuthLogin(MethodView):
         if user and pbkdf2_sha256.verify(user_data["password"], user.password):
             # generated token will be used for the specific end-points
             access_token = create_access_token(identity=str(user.user_id))
+            # Cache session/token in Redis
+            redis_client.setex(f"session:{user.user_id}", 3600, access_token)
             return {"Token": access_token}
         return {"message": "Invalid credentials"}
 
@@ -45,6 +48,19 @@ class UserList(MethodView):
     @blp.response(200, UserSchema(many=True))
     def get(self):
         return UserModel.query.all()
+
+
+@blp.route("/active")
+class ActiveUsers(MethodView):
+    def get(self):
+        active_users = []
+        # Scan Redis for keys that match session pattern
+        for key in redis_client.scan_iter("session:*"):
+            user_id = key.split(":")[1]
+            token = redis_client.get(key)
+            active_users.append({"user_id": user_id, "token": token})
+
+        return {"active_users": active_users}, 200
 
 
 @blp.route("/user/<string:user_id>")
@@ -59,7 +75,6 @@ class User(MethodView):
         except KeyError:
             # return {"message": "store not found"}, 404
             abort(404, message="User does not exists")
-
 
 
 @blp.route("/logout")

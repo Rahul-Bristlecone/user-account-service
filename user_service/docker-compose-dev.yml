@@ -9,9 +9,13 @@ services:
       - .env
     environment:
       - FLASK_ENV=development
+      - REDIS_HOST=${REDIS_HOST}
+      - REDIS_PORT=${REDIS_PORT}
     depends_on:
       store-db:
         condition: service_healthy
+      redis-service:
+        condition: service_started
     ports:
       - "5001:5000"
 
@@ -30,6 +34,12 @@ services:
       retries: 5
     volumes:
       - store_service_db:/var/lib/mysql
+
+  redis-service:
+    image: redis:7.2
+    restart: always
+    ports:
+      - "6379:6379"
 
   # this is just for example of using pre-built image from DockerHub
   # user_service is not dependent on store_service
