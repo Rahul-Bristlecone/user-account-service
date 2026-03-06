@@ -7,6 +7,7 @@ spec:
   selector:
     matchLabels:
       app: user-service
+  # pod template to create pods with the same labels as the selector
   template:
     metadata:
       labels:
@@ -14,10 +15,11 @@ spec:
     spec:
       containers:
       - name: user-service
-        image: sharma92/daemons:user-auth
+        image: sharma92/daemons:user-v1
+        imagePullPolicy: Always
         envFrom:
         - secretRef:
-            name: mysql-secret
+            name: db-secret
         ports:
         - containerPort: 5000
 ---
