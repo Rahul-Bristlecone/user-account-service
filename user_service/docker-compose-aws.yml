@@ -1,9 +1,8 @@
 version: '3.8'
 services:
   user-service:
-    build:
-      context: ../user_service
-      dockerfile: Dockerfile
+    image: sharma92/daemons:user-auth
+    restart: always
   #    target: runtime
     env_file:
       - .env
@@ -20,9 +19,7 @@ services:
       - "5001:5000"
 
   store-service:
-    build:
-      context: D:/Rahul/Projects/store-service/store_service/
-      dockerfile: Dockerfile
+    image: sharma92/daemons:store-service
     env_file:
       - .env
     environment:

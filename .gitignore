@@ -1,18 +1,30 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.env
+.venv/
+env/
+*.egg-info/
+.pytest_cache/
+.mypy_cache/
+
+# Config/Secrets (your specific files)
 config.py
 Utilities.sql_creds.py
 Resources.config.json
 Resources.stores_info.json
-services/__pycache__
-services/models/__pycache__
-services/resources/__pycache__
-.idea/misc.xml
-.idea/pythonProject1.iml
-C:\Users\Rahul.Sharma4\PycharmProjects\Digital_Data_Manager\services\user_service\.env
-C:\Users\Rahul.Sharma4\PycharmProjects\Digital_Data_Manager\services\store_service\.env
-../../.idea/pythonProject1.iml
-user_service/.env
-../.idea/copilot.data.migration.agent.xml
-../.idea/copilot.data.migration.ask.xml
-../.idea/copilot.data.migration.ask2agent.xml
-../.idea/copilot.data.migration.edit.xml
-../.idea/vcs.xml
+
+# IDE
+.idea/
+!.idea/runConfigurations/
+
+# Logs/DB
+*.log
+*.db
+*.sqlite3
+
+# OS
+.DS_Store
+Thumbs.db

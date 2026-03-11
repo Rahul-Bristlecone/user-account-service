@@ -12,7 +12,7 @@
 #      #The Nginx container will serve web traffic on port 80, and the Pod will be managed by Kubernetes to
 #      #ensure high availability and scalability.
 
-#multi-container Pod example
+#multi-container Pod example file
 apiVersion: v1
 kind: Pod
 metadata:
@@ -34,8 +34,8 @@ spec:
           cpu: "500m"
       command: ["/bin/sh"]
       args: ["-c", "echo 'This container will crash in 30 seconds'; sleep 30; exit 1"]
-  ports:
-    - containerPort: 80
+      ports:
+      - containerPort: 80
     - name: log-agent-container
       image: busybox:latest
       command: ["sh", "-c", "while true; do echo '$(date): Logging...'; sleep 5; done"]
