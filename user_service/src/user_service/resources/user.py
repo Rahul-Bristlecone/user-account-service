@@ -1,7 +1,9 @@
+import json
+
 from flask_smorest import Blueprint, abort
 from flask.views import MethodView
 from passlib.hash import pbkdf2_sha256
-from flask_jwt_extended import create_access_token, get_jwt, jwt_required
+from flask_jwt_extended import create_access_token, get_jwt, jwt_required, get_jwt_identity
 from user_service.blocklist import BLOCKLIST
 
 from user_service.src.user_service.extensions.redis_client import redis_client
@@ -24,7 +26,8 @@ class UserRegister(MethodView):
         db.session.add(user)
         db.session.commit()
 
-        return {"message": "User created successfully"}, 201
+        return {"message": "User created successfully",
+                "USERNAME": user.username}, 201
 
 
 @blp.route("/login")
@@ -38,8 +41,9 @@ class UserAuthLogin(MethodView):
             # generated token will be used for the specific end-points
             access_token = create_access_token(identity=str(user.user_id))
             # Cache session/token in Redis
-            redis_client.setex(f"session:{user.user_id}", 3600, access_token)
-            return {"Token": access_token}
+            redis_client.setex(f"session:{user.user_id}", 3600, json.dumps({"token":access_token, "username":user.username}))
+            return {"Token": access_token,
+                    "USERNAME": user.username}, 200
         return {"message": "Invalid credentials"}
 
 
@@ -57,8 +61,9 @@ class ActiveUsers(MethodView):
         # Scan Redis for keys that match session pattern
         for key in redis_client.scan_iter("session:*"):
             user_id = key.split(":")[1]
+            data = json.loads(redis_client.get(key))
             token = redis_client.get(key)
-            active_users.append({"user_id": user_id, "token": token})
+            active_users.append({"user_id": user_id, "Token": data["token"], "Username":data["username"]})
 
         return {"active_users": active_users}, 200
 
@@ -78,10 +83,18 @@ class User(MethodView):
 
 
 @blp.route("/logout")
-class UserAuthLogout(MethodView):
+class UserLogout(MethodView):
     @jwt_required()
     def post(self):
-        jti = get_jwt()["jti"]
-        BLOCKLIST.add(jti)
-        return {"message": "successfully logged out"}
+        user_id = get_jwt_identity()
+        redis_client.delete(f"session:{user_id}")
+        return {"message": "Logged out successfully"}, 200
+
+# @blp.route("/logout")
+# class UserAuthLogout(MethodView):
+#     @jwt_required()
+#     def post(self):
+#         jti = get_jwt()["jti"]
+#         BLOCKLIST.add(jti)
+#         return {"message": "successfully logged out"}
 
