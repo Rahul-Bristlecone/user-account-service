@@ -35,7 +35,7 @@ spec:
       command: ["/bin/sh"]
       args: ["-c", "echo 'This container will crash in 30 seconds'; sleep 30; exit 1"]
       ports:
-      - containerPort: 80
+        - containerPort: 80
     - name: log-agent-container
       image: busybox:latest
       command: ["sh", "-c", "while true; do echo '$(date): Logging...'; sleep 5; done"]

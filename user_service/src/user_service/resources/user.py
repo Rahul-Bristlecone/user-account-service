@@ -27,7 +27,7 @@ class UserRegister(MethodView):
         db.session.commit()
 
         return {"message": "User created successfully",
-                "USERNAME": user.username}, 201
+                "Username": user.username}, 201
 
 
 @blp.route("/login")
@@ -43,7 +43,7 @@ class UserAuthLogin(MethodView):
             # Cache session/token in Redis
             redis_client.setex(f"session:{user.user_id}", 3600, json.dumps({"token":access_token, "username":user.username}))
             return {"Token": access_token,
-                    "USERNAME": user.username}, 200
+                    "Username": user.username}, 200
         return {"message": "Invalid credentials"}
 
 
@@ -62,8 +62,7 @@ class ActiveUsers(MethodView):
         for key in redis_client.scan_iter("session:*"):
             user_id = key.split(":")[1]
             data = json.loads(redis_client.get(key))
-            token = redis_client.get(key)
-            active_users.append({"user_id": user_id, "Token": data["token"], "Username":data["username"]})
+            active_users.append({"user_id": user_id, "Username":data["username"]})
 
         return {"active_users": active_users}, 200
 
@@ -86,15 +85,9 @@ class User(MethodView):
 class UserLogout(MethodView):
     @jwt_required()
     def post(self):
+        # jti = get_jwt()["jti"]  # Add to BLOCKLIST (immediate block)
+        # BLOCKLIST.add(jti)
+
         user_id = get_jwt_identity()
         redis_client.delete(f"session:{user_id}")
         return {"message": "Logged out successfully"}, 200
-
-# @blp.route("/logout")
-# class UserAuthLogout(MethodView):
-#     @jwt_required()
-#     def post(self):
-#         jti = get_jwt()["jti"]
-#         BLOCKLIST.add(jti)
-#         return {"message": "successfully logged out"}
-
