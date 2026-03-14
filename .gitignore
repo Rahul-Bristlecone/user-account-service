@@ -18,6 +18,7 @@ Resources.stores_info.json
 
 # IDE
 .idea/
+.vscode
 !.idea/runConfigurations/
 
 # Logs/DB
