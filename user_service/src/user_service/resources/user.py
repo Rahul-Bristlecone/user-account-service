@@ -27,7 +27,7 @@ class UserRegister(MethodView):
         db.session.commit()
 
         return {"message": "User created successfully",
-                "Username": user.username}, 201
+                "username": user.username}, 201
 
 
 @blp.route("/login")
@@ -43,7 +43,7 @@ class UserAuthLogin(MethodView):
             # Cache session/token in Redis
             redis_client.setex(f"session:{user.user_id}", 3600, json.dumps({"token":access_token, "username":user.username}))
             return {"Token": access_token,
-                    "Username": user.username}, 200
+                    "username": user.username}, 200
         return {"message": "Invalid credentials"}
 
 
@@ -60,9 +60,18 @@ class ActiveUsers(MethodView):
         active_users = []
         # Scan Redis for keys that match session pattern
         for key in redis_client.scan_iter("session:*"):
-            user_id = key.split(":")[1]
-            data = json.loads(redis_client.get(key))
-            active_users.append({"user_id": user_id, "Username":data["username"]})
+            data = redis_client.get(key)
+            if data is None:  # Skip expired keys
+                continue
+
+            try:
+                user_data = json.loads(data)  # Single call, safe
+                active_users.append({
+                    "user_id": key.split(":")[1],
+                    "Username": user_data["username"]
+                })
+            except (json.JSONDecodeError, KeyError):  # Bad JSON or missing fields
+                continue
 
         return {"active_users": active_users}, 200
 

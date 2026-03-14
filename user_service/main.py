@@ -1,9 +1,10 @@
 import os
 from dotenv import load_dotenv
 
-from flask import Flask, jsonify
+from flask import Flask, jsonify, request
 from flask_smorest import Api
 from flask_jwt_extended import JWTManager
+from flask_cors import CORS
 
 from user_service.blocklist import BLOCKLIST
 
@@ -49,7 +50,38 @@ def create_app(db_url=None):
     db.init_app(user_service)  # db is SQLAlchemy extension
     user_service.config['TESTING'] = True  # Enable testing mode for the Flask app
 
+    CORS(user_service, resources={
+        r"/*": {
+            "origins": [
+                "http://localhost:5173",  # Vite dev server
+                "http://localhost:3000",  # CRA dev server
+                "http://127.0.0.1:5173",  # Vite dev server
+                "http://127.0.0.1:3000",  # CRA dev server
+                "https://localhost:*"
+            ],
+            "methods": ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+            "allow_headers": ["Content-Type", "Authorization"],
+            "supports_credentials": True
+        }
+    })
+
     api = Api(user_service)
+
+    @user_service.after_request
+    def ensure_cors_headers(response):
+        origin = request.headers.get('Origin')
+        allowed_origins = [
+            "http://localhost:5173",
+            "http://localhost:3000",
+            "http://127.0.0.1:5173",
+            "http://127.0.0.1:3000"
+        ]
+        if origin and (origin in allowed_origins or origin.startswith("https://localhost:")):
+            response.headers['Access-Control-Allow-Origin'] = origin
+            response.headers['Access-Control-Allow-Methods'] = 'GET, POST, PUT, DELETE, OPTIONS'
+            response.headers['Access-Control-Allow-Headers'] = 'Content-Type, Authorization'
+            response.headers['Access-Control-Allow-Credentials'] = 'true'
+        return response
 
     """
         Note: As the user service is issuing (signing/generating) JWT tokens, the following code
