@@ -1,6 +1,8 @@
 import os
 from dotenv import load_dotenv
 
+load_dotenv()
+
 from flask import Flask, jsonify, request
 from flask_smorest import Api
 from flask_jwt_extended import JWTManager
@@ -13,6 +15,7 @@ from user_service.src.user_service.resources.user import blp as UserBp
 
 def create_app(db_url=None):
     user_service = Flask(__name__)
+    user_service.config["CORS_AUTOMATIC_OPTIONS"] = True
     user_service.config["PROPAGATE_EXCEPTIONS"] = True
     user_service.config["API_TITLE"] = "User Service API"
     user_service.config["API_VERSION"] = "v1"
@@ -20,7 +23,22 @@ def create_app(db_url=None):
     user_service.config["OPENAPI_URL_PREFIX"] = "/"
     user_service.config["OPENAPI_SWAGGER_UI_PATH"] = "/swagger-ui"
     user_service.config["OPENAPI_SWAGGER_UI_URL"] = "https://cdn.jsdelivr.net/npm/swagger-ui-dist/"
-    """ for SQLite, local database file is created in the data directory of the store service application.
+    
+    # Configure CORS for production
+    allowed_origins = os.getenv('ALLOWED_ORIGINS').split(",")
+    allowed_origins = [origin.strip() for origin in allowed_origins]
+    
+    CORS(
+    user_service,
+    origins=allowed_origins,
+    supports_credentials=True,
+    allow_headers=["Content-Type", "Authorization"],
+    methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+    intercept_exceptions=True
+    )
+
+    """ 
+        for SQLite, local database file is created in the data directory of the store service application.
         This is useful for development and testing purposes, as it allows the application to run without needing an 
         external database server. (not to be used in production)
     """
@@ -50,23 +68,6 @@ def create_app(db_url=None):
     db.init_app(user_service)  # db is SQLAlchemy extension
     user_service.config['TESTING'] = True  # Enable testing mode for the Flask app
 
-    # Configure CORS for production
-    allowed_origins = os.getenv(
-        "ALLOWED_ORIGINS",
-        "http://127.0.0.1:5001"  # Set via environment variable in production
-    ).split(",")
-    allowed_origins = [origin.strip() for origin in allowed_origins]
-    
-    CORS(user_service, resources={
-        r"/*": {
-            "origins": allowed_origins,
-            "methods": ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
-            "allow_headers": ["Content-Type", "Authorization"],
-            "supports_credentials": True,
-            "max_age": 3600
-        }
-    })
-
     api = Api(user_service)
 
     """
@@ -90,9 +91,9 @@ def create_app(db_url=None):
         ***
     """
 
-    load_dotenv()
     user_service.config["JWT_SECRET_KEY"] = os.environ.get("JWT_SECRET_KEY")
     user_service.config["JWT_TOKEN_LOCATION"] = ["headers"]
+
     jwt = JWTManager(user_service)
 
     @jwt.token_in_blocklist_loader
