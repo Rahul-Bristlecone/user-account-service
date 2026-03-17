@@ -121,5 +121,9 @@ def create_app(db_url=None):
     def create_tables():
         db.create_all()
 
+    @user_service.route("/health")
+    def health():
+        return jsonify({"status": "healthy"}), 200
+
     api.register_blueprint(UserBp)
     return user_service
