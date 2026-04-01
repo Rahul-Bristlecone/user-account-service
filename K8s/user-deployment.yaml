@@ -15,7 +15,7 @@ spec:
     spec:
       containers:
       - name: user-service
-        image: sharma92/daemons:user-auth
+        image: sharma92/daemons:user-service
         imagePullPolicy: Always
         envFrom:
         - secretRef:
@@ -51,10 +51,10 @@ kind: Service
 metadata:
   name: user-service
 spec:
-  type: NodePort
+  # type: NodePort
   selector:
     app: user-service
   ports:
     - port: 5000
       targetPort: 5000
-      nodePort: 30001
+      # nodePort: 30001
