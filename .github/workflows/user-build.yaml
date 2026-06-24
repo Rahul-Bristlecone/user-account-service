@@ -1,0 +1,23 @@
+name: user service build
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  sast:
+    name: Security Analysis
+    uses: ./.github/workflows/sast.yaml
+    with:
+      target-environment: production
+    secrets: inherit
+  
+  ci:
+    name: Build and Test
+    needs: sast
+    uses: ./.github/workflows/common-reusable.yaml
+    with:
+      service-name: user-service
+      docker-repo: daemons
+      target-environment: production
+    secrets: inherit

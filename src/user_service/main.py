@@ -10,8 +10,8 @@ from flask_cors import CORS
 
 from user_service.blocklist import BLOCKLIST
 
-from user_service.src.user_service.extensions.db import db
-from user_service.src.user_service.resources.user import blp as UserBp
+from user_service.extensions.db import db
+from user_service.resources.user import blp as UserBp
 
 def create_app(db_url=None):
     user_service = Flask(__name__)
