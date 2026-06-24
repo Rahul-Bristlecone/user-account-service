@@ -1,4 +1,4 @@
-from user_service.src.user_service.extensions.db import db
+from user_service.extensions.db import db
 
 
 class UserModel(db.Model):

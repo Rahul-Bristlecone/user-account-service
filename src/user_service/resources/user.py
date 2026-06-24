@@ -6,10 +6,10 @@ from passlib.hash import pbkdf2_sha256
 from flask_jwt_extended import create_access_token, get_jwt, jwt_required, get_jwt_identity
 from user_service.blocklist import BLOCKLIST
 
-from user_service.src.user_service.extensions.redis_client import redis_client
-from user_service.src.user_service.extensions.db import db
-from user_service.src.user_service.models.user_db import UserModel
-from user_service.src.user_service.schemas.user_schema import UserSchema
+from user_service.extensions.redis_client import redis_client
+from user_service.extensions.db import db
+from user_service.models.user_db import UserModel
+from user_service.schemas.user_schema import UserSchema
 
 blp = Blueprint("Users", __name__, description="operations on user")
 
