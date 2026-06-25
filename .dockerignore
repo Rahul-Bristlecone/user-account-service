@@ -1,1 +1,35 @@
+# VCS
+.git
+.gitignore
+
+# Environment / local config
 .env
+.env.*
+.venv/
+env/
+
+# Python cache / build
+__pycache__/
+*.py[cod]
+*.egg-info/
+build/
+dist/
+pip-wheel-metadata/
+
+# Test and coverage artifacts
+tests/
+.pytest_cache/
+.mypy_cache/
+.coverage
+.coverage.*
+coverage.xml
+htmlcov/
+
+# IDE / OS files
+.idea/
+.vscode/
+.DS_Store
+Thumbs.db
+
+# CI / docs (not needed in build context)
+.github/

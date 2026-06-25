@@ -9,6 +9,14 @@ env/
 *.egg-info/
 .pytest_cache/
 .mypy_cache/
+.ruff_cache/
+
+# Coverage / test artifacts
+.coverage
+.coverage.*
+coverage.xml
+htmlcov/
+pytestdebug.log
 
 # Config/Secrets (your specific files)
 config.py
@@ -25,6 +33,16 @@ Resources.stores_info.json
 *.log
 *.db
 *.sqlite3
+
+# Build / packaging artifacts
+build/
+dist/
+pip-wheel-metadata/
+
+# Type checker / notebooks
+.pyre/
+.hypothesis/
+.ipynb_checkpoints/
 
 # OS
 .DS_Store
