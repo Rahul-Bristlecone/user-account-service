@@ -17,7 +17,7 @@ dependencies = [
     "flask_sqlalchemy",
     "Flask==2.3.2",
     "gunicorn>=22.0.0",
-    "Werkzeug>=2.3.0,<3.0",
+    "Werkzeug>=3.0.3",
     "Jinja2==3.1.2",
     "marshmallow==3.19.0",
     "packaging==23.1",
@@ -26,7 +26,7 @@ dependencies = [
     "passlib~=1.7.4",
     "requests==2.31.0",
     "redis~=4.5.0",
-    "flask-cors~=3.0.10",
+    "flask-cors~=4.0.2",
     "flask-jwt-extended~=4.5.2",
     "sqlalchemy>=2.0.36",
     "pandas~=2.2.3",
@@ -36,7 +36,7 @@ dependencies = [
     "alembic~=1.7.7",
     "typing_extensions~=4.12.2",
     "pymysql>=1.1.1",
-    "cryptography~=41.0.0",
+    "cryptography~=48.0.1",
     "build>=1.0.0"
 ]
 
