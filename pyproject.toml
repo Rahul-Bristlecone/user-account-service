@@ -16,7 +16,7 @@ dependencies = [
     "flask-smorest",
     "flask_sqlalchemy",
     "Flask==2.3.2",
-    "gunicorn~=21.2.0",
+    "gunicorn>=22.0.0",
     "Werkzeug>=2.3.0,<3.0",
     "Jinja2==3.1.2",
     "marshmallow==3.19.0",
@@ -35,7 +35,7 @@ dependencies = [
     "filelock~=3.16.0",
     "alembic~=1.7.7",
     "typing_extensions~=4.12.2",
-    "pymysql~=1.0.3",
+    "pymysql>=1.1.1",
     "cryptography~=41.0.0",
     "build>=1.0.0"
 ]
