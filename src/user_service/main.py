@@ -58,7 +58,7 @@ def create_app(db_url=None):
         user-auth-service.config["SQLALCHEMY_DATABASE_URI"] = "mysql+pymysql://user_user:user_pass@mysql_user:3306/user_db"
     """
 
-    SQLALCHEMY_DATABASE_URI = (
+    SQLALCHEMY_DATABASE_URI = db_url or (
         f"mysql+pymysql://{os.getenv('MYSQL_USER')}:{os.getenv('MYSQL_PASSWORD')}@"
         f"{os.getenv('DB_HOST')}:{os.getenv('DB_PORT')}/{os.getenv('MYSQL_DATABASE')}"
     )
