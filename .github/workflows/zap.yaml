@@ -8,7 +8,7 @@ on:
         type: string
 
 jobs:
-  zap_scan:
+  ZapScan:
     runs-on: ubuntu-latest
     steps:
       - name: ZAP Baseline Scan
