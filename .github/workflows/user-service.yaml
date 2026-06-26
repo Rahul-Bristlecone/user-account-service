@@ -21,3 +21,11 @@ jobs:
       docker-repo: daemons
       target-environment: production
     secrets: inherit
+
+  zap:
+    name: OWASP ZAP Scan
+    needs: ci
+    uses: ./.github/workflows/zap.yaml
+    with:
+      target-url: https://marry-fifty-rocky.ngrok-free.dev
+    secrets: inherit
