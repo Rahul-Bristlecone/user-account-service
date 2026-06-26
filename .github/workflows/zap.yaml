@@ -17,3 +17,12 @@ jobs:
           target: ${{ inputs.target-url }}
           # rules_file_name: '.zap/rules.tsv'
           issue_title: 'ZAP Security Scan'
+        
+      - name: Upload ZAP Reports
+        uses: actions/upload-artifact@v4
+        with:
+          name: ZapScanReports   # ✅ valid name
+          path: |
+            report_json.json
+            report_md.md
+            report_html.html
