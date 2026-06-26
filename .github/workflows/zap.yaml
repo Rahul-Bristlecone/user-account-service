@@ -6,7 +6,6 @@ on:
       target-url:
         required: true
         type: string
-    secrets: inherit
 
 jobs:
   zap_scan:
