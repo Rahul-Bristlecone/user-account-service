@@ -99,6 +99,9 @@ jobs:
           tags: |
             ${{ secrets.DOCKER_USERNAME }}/${{ inputs.docker-repo }}:${{ inputs.service-name }}-latest 
           # helm will take care of the versioning & tags
+          
+          cache-from: type=registry,ref=${{ secrets.DOCKER_USERNAME }}/${{ inputs.docker-repo }}:${{ inputs.service-name }}-latest
+          cache-to: type=registry,ref=${{ secrets.DOCKER_USERNAME }}/${{ inputs.docker-repo }}:${{ inputs.service-name }}-buildcache,mode=max
 
       # ✅ Trivy scan step
       - name: Scan Docker image with Trivy
